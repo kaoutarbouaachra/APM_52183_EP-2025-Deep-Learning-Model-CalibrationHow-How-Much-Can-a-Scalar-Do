@@ -2,10 +2,6 @@
 
 This folder contains experiments designed to investigate the **limitations of Temperature Scaling** in scenarios where classes overlap. The goal is to evaluate how well different models and calibration methods (ERM, Mixup, Temperature Scaling) handle **class overlap** situations, where the model might be more prone to overconfidence errors.
 
-## The Role of Temperature Scaling (TS)
-
-Temperature Scaling (TS) is a simple post-hoc calibration method that rescales the logits of a trained model using a single scalar temperature $T$. While TS is effective in reducing overall overconfidence, it has fundamental limitations when the model has **hard decision boundaries**, such as those created by standard Empirical Risk Minimization (ERM) training.
-
 ## Major Limitations of Temperature Scaling
 
 ### Class Overlap and the Advantage of Mixup
@@ -91,3 +87,4 @@ Each experiment explores a different combination of dataset, architecture, and l
 8. Kingma, Diederik P.; Ba, Jimmy.  
    *Adam: A Method for Stochastic Optimization*, 2014.  
    [Link](https://arxiv.org/abs/1412.6980)
+
