@@ -1,0 +1,46 @@
+The following model/training parameters were used for this run: 
+
+val_prop =  0.1
+batch_size =  500
+mixup_alpha =  1
+mix_size =  2
+lr =  0.001
+epochs =  100
+num_runs =  1
+n_bins =  15
+-------------------------------------------------
+
+Mixup model results: 
+Last Train Error: 0.0578
+Last Test Error: 55.7500
+-------------------------------------------------
+
+Average ACE: 0.0867	 1 std: 0.0000
+Average ECE: 0.0723	 1 std: 0.0000
+Average MCE: 0.1658	 1 std: 0.0000
+Average NLL: 2.4767	 1 std: 0.0000
+-------------------------------------------------
+
+Average Post-TS ACE: 0.0752	 1 std: 0.0000
+Average Post-TS ECE: 0.0651	 1 std: 0.0000
+Average Post-TS MCE: 0.1451	 1 std: 0.0000
+Average Post-TS NLL: 2.4717	 1 std: 0.0000
+-------------------------------------------------
+
+ERM model results: 
+Last Train Error: 0.0289
+Last Test Error: 57.7100
+-------------------------------------------------
+
+Average ACE: 0.3605	 1 std: 0.0000
+Average ECE: 0.3984	 1 std: 0.0000
+Average MCE: 0.5822	 1 std: 0.0000
+Average NLL: 4.7081	 1 std: 0.0000
+-------------------------------------------------
+
+Average Post-TS ACE: 0.3499	 1 std: 0.0000
+Average Post-TS ECE: 0.3796	 1 std: 0.0000
+Average Post-TS MCE: 0.5615	 1 std: 0.0000
+Average Post-TS NLL: 4.3237	 1 std: 0.0000
+-------------------------------------------------
+
