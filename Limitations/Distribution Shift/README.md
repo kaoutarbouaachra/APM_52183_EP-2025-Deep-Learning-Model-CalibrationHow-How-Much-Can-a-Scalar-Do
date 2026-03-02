@@ -93,23 +93,9 @@ Open the provided Jupyter Notebook to visualize the benchmark results.
 *Mix-n-Match: Ensemble and Compositional Methods for Uncertainty Calibration in Deep Learning*. ICML.
 *(Introduces ETS)* [Link](https://arxiv.org/abs/2003.07329)
 5. Paisley, J., et al. (2024).
-*Top-versus-All Calibration for Neural Networks*.
+*Top-versus-All Calibration for Neural Networks*.[Link](https://arxiv.org/pdf/2505.22803)
 6. *Density-Aware Calibration (DAC)* (2023).
-*(Input-dependent scaling using logit-space L2 distance to validation mean).*
-<span style="display:none">[^1][^2][^3][^4][^5][^6][^7]</span>
+*(Input-dependent scaling using logit-space L2 distance to validation mean).* [link](https://arxiv.org/html/2302.05118v2#:~:text=DAC%20boosts%20the%20robustness%20of,architectures%2C%20datasets%2C%20and%20metrics.) 
 
-<div align="center">⁂</div>
 
-[^1]: corruptions.py
 
-[^2]: demo.py
-
-[^3]: train.py
-
-[^4]: temperature_scaling.py
-
-[^5]: evaluate_shift.py
-
-[^6]: plot_per_corruption.py
-
-[^7]: summary.ipynb
