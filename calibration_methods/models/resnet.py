@@ -110,26 +110,6 @@ class ResNet(nn.Module):
 
         self.model = model
 
-        # for name, p in self.model.named_parameters():
-        #     if not name.startswith("fc."):
-        #         p.requires_grad = False
-
-    # def unfreeze_all(self) -> None:
-    #     """Convenience helper to switch to full fine-tuning."""
-    #     for p in self.model.parameters():
-    #         p.requires_grad = True
-
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
 
-
-# -----------------------
-# Minimal usage examples:
-# -----------------------
-if __name__ == "__main__":
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-
-    m_c10 = ResNet(num_classes=10, config=ResNetConfig("resnet152", True)).to(device)
-    x_cifar = torch.randn(2, 3, 32, 32, device=device)
-    y_cifar = m_c10(x_cifar)
-    print("CIFAR logits:", y_cifar.shape)  # (2, 10)

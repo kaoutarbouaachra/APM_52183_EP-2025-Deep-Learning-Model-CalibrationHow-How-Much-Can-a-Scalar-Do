@@ -103,267 +103,82 @@ IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD  = (0.229, 0.224, 0.225)
 
 
-# # Finetuning ResNet 152
-# train_transform_resnet_cifar10 = transforms.Compose([
-#     transforms.RandomCrop(32, padding=4),
-#     transforms.RandomHorizontalFlip(),
-#     transforms.ToTensor(),
-#     transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),
-# ])
+# Finetuning ResNet 152
+train_transform_resnet_cifar10 = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),
+])
 
-# val_transform_resnet_cifar10 = transforms.Compose([
-#     transforms.ToTensor(),
-#     transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),
-# ])
+val_transform_resnet_cifar10 = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),
+])
 
-# train_transform_resnet_cifar100 = transforms.Compose([
-#     transforms.RandomCrop(32, padding=4),
-#     transforms.RandomHorizontalFlip(),
-#     transforms.ToTensor(),
-#     transforms.Normalize(CIFAR100_MEAN, CIFAR100_STD),
-# ])
+train_transform_resnet_cifar100 = transforms.Compose([
+    transforms.RandomCrop(32, padding=4),
+    transforms.RandomHorizontalFlip(),
+    transforms.ToTensor(),
+    transforms.Normalize(CIFAR100_MEAN, CIFAR100_STD),
+])
 
-# val_transform_resnet_cifar100 = transforms.Compose([
-#     transforms.ToTensor(),
-#     transforms.Normalize(CIFAR100_MEAN, CIFAR100_STD),
-# ])
-
-
-# train_loader_resnet_cifar10, val_loader_resnet_cifar10, _ = get_cifar_loaders(
-#     dataset_name="cifar10",
-#     train_transform=train_transform_resnet_cifar10,
-#     val_transform=val_transform_resnet_cifar10,
-#     batch_size=256
-# )
-
-# train_loader_resnet_cifar100, val_loader_resnet_cifar100, _ = get_cifar_loaders(
-#     dataset_name="cifar100",
-#     train_transform=train_transform_resnet_cifar100,
-#     val_transform=val_transform_resnet_cifar100,
-#     batch_size=256
-# )
-
-# ## Finetuning ResNet 152 for CIFAR10
-
-# resnet_cifar10 = ResNet(num_classes = 10)
-# optimizer_resnet_cifar10 = torch.optim.AdamW(resnet_cifar10.parameters(), lr=1e-3, weight_decay=1e-4)
-
-# train_classifier(
-#     model = resnet_cifar10,
-#     train_loader = train_loader_resnet_cifar10,
-#     val_loader = val_loader_resnet_cifar10,
-#     device = device,
-#     optimizer = optimizer_resnet_cifar10,
-#     epochs = 100,
-#     use_amp = True,
-#     name_model = "resnet152",
-#     name_dataset="cifar10",
-# )
-
-# ## Finetuning ResNet 152 for CIFAR100
-# resnet_cifar100 = ResNet(num_classes = 100)
-# optimizer_resnet_cifar100 = torch.optim.AdamW(resnet_cifar100.parameters(), lr=1e-3, weight_decay=1e-4)
-
-# train_classifier(
-#     model = resnet_cifar100,
-#     train_loader = train_loader_resnet_cifar100,
-#     val_loader = val_loader_resnet_cifar100,
-#     device = device,
-#     optimizer = optimizer_resnet_cifar100,
-#     epochs = 100,
-#     use_amp = True,
-#     name_model = "resnet152",
-#     name_dataset="cifar100",
-# )
+val_transform_resnet_cifar100 = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(CIFAR100_MEAN, CIFAR100_STD),
+])
 
 
+train_loader_resnet_cifar10, val_loader_resnet_cifar10, _ = get_cifar_loaders(
+    dataset_name="cifar10",
+    train_transform=train_transform_resnet_cifar10,
+    val_transform=val_transform_resnet_cifar10,
+    batch_size=256
+)
 
-# # Finetuning MLP-Mixer
-# train_transform_mixer_cifar10 = transforms.Compose([
-#     transforms.RandomCrop(32, padding=4),
-#     transforms.RandomHorizontalFlip(),
-#     transforms.RandAugment(num_ops=2, magnitude=9),
-#     transforms.ToTensor(),
-#     transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),
-# ])
+train_loader_resnet_cifar100, val_loader_resnet_cifar100, _ = get_cifar_loaders(
+    dataset_name="cifar100",
+    train_transform=train_transform_resnet_cifar100,
+    val_transform=val_transform_resnet_cifar100,
+    batch_size=256
+)
 
-# val_transform_mixer_cifar10 = transforms.Compose([
-#     transforms.ToTensor(),
-#     transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),
-# ])
+## Finetuning ResNet 152 for CIFAR10
 
-# train_transform_mixer_cifar100 = transforms.Compose([
-#     transforms.RandomCrop(32, padding=4),
-#     transforms.RandomHorizontalFlip(),
-#     transforms.RandAugment(num_ops=2, magnitude=9),
-#     transforms.ToTensor(),
-#     transforms.Normalize(CIFAR100_MEAN, CIFAR100_STD),
-# ])
+resnet_cifar10 = ResNet(num_classes = 10)
+optimizer_resnet_cifar10 = torch.optim.AdamW(resnet_cifar10.parameters(), lr=1e-3, weight_decay=1e-4)
 
-# val_transform_mixer_cifar100 = transforms.Compose([
-#     transforms.ToTensor(),
-#     transforms.Normalize(CIFAR100_MEAN, CIFAR100_STD),
-# ])
+train_classifier(
+    model = resnet_cifar10,
+    train_loader = train_loader_resnet_cifar10,
+    val_loader = val_loader_resnet_cifar10,
+    device = device,
+    optimizer = optimizer_resnet_cifar10,
+    epochs = 100,
+    use_amp = True,
+    name_model = "resnet152",
+    name_dataset="cifar10",
+)
 
+## Finetuning ResNet 152 for CIFAR100
+resnet_cifar100 = ResNet(num_classes = 100)
+optimizer_resnet_cifar100 = torch.optim.AdamW(resnet_cifar100.parameters(), lr=1e-3, weight_decay=1e-4)
 
-# train_loader_mixer_cifar10, val_loader_mixer_cifar10, _ = get_cifar_loaders(
-#     dataset_name="cifar10",
-#     train_transform=train_transform_mixer_cifar10,
-#     val_transform=val_transform_mixer_cifar10,
-#     batch_size=256
-# )
-
-# train_loader_mixer_cifar100, val_loader_mixer_cifar100, _ = get_cifar_loaders(
-#     dataset_name="cifar100",
-#     train_transform=train_transform_mixer_cifar100,
-#     val_transform=val_transform_mixer_cifar100,
-#     batch_size=256
-# )
-
-
-# ## Finetuning MLP-Mixer for CIFAR10
-# mlp_mixer_cifar10 = MLPMixer(num_classes = 10)
-# optimizer_mlpMixer_cifar10 = torch.optim.AdamW(mlp_mixer_cifar10.parameters(), lr=1e-3, weight_decay=1e-5)
-
-# warmup_scheduler_mlpMixer_cifar10 = torch.optim.lr_scheduler.LinearLR(optimizer_mlpMixer_cifar10, start_factor=0.1, total_iters=5)
-# cosine_scheduler_mlpMixer_cifar10 = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_mlpMixer_cifar10, T_max=300 - 5, eta_min=1e-6)
-
-# scheduler_mlpMixer_cifar10 = torch.optim.lr_scheduler.SequentialLR(
-#     optimizer_mlpMixer_cifar10, 
-#     schedulers=[warmup_scheduler_mlpMixer_cifar10, cosine_scheduler_mlpMixer_cifar10],
-#     milestones=[5]
-# )
-
-
-# train_classifier(
-#     model = mlp_mixer_cifar10,
-#     train_loader = train_loader_mixer_cifar10,
-#     val_loader = val_loader_mixer_cifar10,
-#     device = device,
-#     optimizer = optimizer_mlpMixer_cifar10,
-#     scheduler = scheduler_mlpMixer_cifar10,
-#     epochs = 200,
-#     use_amp = True,
-#     name_model = "MLPMixer",
-#     name_dataset="cifar10",
-# )
-
-# ## Finetuning MLP-Mixer for CIFAR100
-# mlp_mixer_cifar100 = MLPMixer(num_classes = 100)
-
-# optimizer_mlpMixer_cifar100 = torch.optim.AdamW(mlp_mixer_cifar100.parameters(), lr=1e-3, weight_decay=1e-5)
-
-# warmup_scheduler_mlpMixer_cifar100 = torch.optim.lr_scheduler.LinearLR(optimizer_mlpMixer_cifar100, start_factor=0.1, total_iters=5)
-# cosine_scheduler_mlpMixer_cifar100 = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_mlpMixer_cifar100, T_max=300 - 5, eta_min=1e-6)
-
-# scheduler_mlpMixer_cifar100 = torch.optim.lr_scheduler.SequentialLR(
-#     optimizer_mlpMixer_cifar100, 
-#     schedulers=[warmup_scheduler_mlpMixer_cifar100, cosine_scheduler_mlpMixer_cifar100],
-#     milestones=[5]
-# )
-
-# train_classifier(
-#     model = mlp_mixer_cifar100,
-#     train_loader = train_loader_mixer_cifar100,
-#     val_loader = val_loader_mixer_cifar100,
-#     device = device,
-#     optimizer = optimizer_mlpMixer_cifar100,
-#     scheduler = scheduler_mlpMixer_cifar100,
-#     epochs = 200,
-#     use_amp = True,
-#     name_model = "MLPMixer",
-#     name_dataset="cifar100",
-# )
-
-
-# # Finetuning ViT
-# train_transform_vit_cifar = transforms.Compose([
-#     transforms.Resize(256),
-#     transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
-#     transforms.RandomHorizontalFlip(),
-#     transforms.RandAugment(num_ops=2, magnitude=9),
-#     transforms.ToTensor(),
-#     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
-# ])
-
-# val_transform_vit_cifar = transforms.Compose([
-#     transforms.Resize(256),
-#     transforms.CenterCrop(224),
-#     transforms.ToTensor(),
-#     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
-# ])
-
-# train_loader_vit_cifar10, val_loader_vit_cifar10, _ = get_cifar_loaders(
-#     dataset_name="cifar10",
-#     train_transform=train_transform_vit_cifar,
-#     val_transform=val_transform_vit_cifar,
-#     batch_size=256
-# )
-
-# train_loader_vit_cifar100, val_loader_vit_cifar100, _ = get_cifar_loaders(
-#     dataset_name="cifar100",
-#     train_transform=train_transform_vit_cifar,
-#     val_transform=val_transform_vit_cifar,
-#     batch_size=256
-# )
-
-
-# ## Finetuning ViT for CIFAR10
-# vit_cifar10 = ViT(num_classes=10)
-
-# optimizer_vit_cifar10 = torch.optim.AdamW(vit_cifar10.parameters(), lr=3e-4, weight_decay=5e-2)
-
-# warmup_cifar10 = torch.optim.lr_scheduler.LinearLR(optimizer_vit_cifar10, start_factor=0.1, total_iters=5)
-# cosine_cifar10 = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_vit_cifar10, T_max=100-5, eta_min=1e-5)
-
-# scheduler_vit_cifar10 = torch.optim.lr_scheduler.SequentialLR(
-#     optimizer_vit_cifar10,
-#     schedulers=[warmup_cifar10, cosine_cifar10],
-#     milestones=[5]
-# )
-
-# train_classifier(
-#     model = vit_cifar10,
-#     train_loader = train_loader_vit_cifar10,
-#     val_loader = val_loader_vit_cifar10,
-#     device = device,
-#     optimizer = optimizer_vit_cifar10,
-#     scheduler = scheduler_vit_cifar10,
-#     epochs = 100,
-#     use_amp = True,
-#     name_model = "ViT",
-#     name_dataset="cifar10",
-# )
-
-# ## Finetuning ViT for CIFAR100
-# vit_cifar100 = ViT(num_classes=100)
-
-# optimizer_vit_cifar100 = torch.optim.AdamW(vit_cifar100.parameters(), lr=3e-4, weight_decay=5e-2)
-
-# warmup_cifar100 = torch.optim.lr_scheduler.LinearLR(optimizer_vit_cifar100, start_factor=0.1, total_iters=5)
-# cosine_cifar100 = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_vit_cifar100, T_max=100-5, eta_min=1e-5)
-
-# scheduler_vit_cifar100 = torch.optim.lr_scheduler.SequentialLR(
-#     optimizer_vit_cifar100,
-#     schedulers=[warmup_cifar100, cosine_cifar100],
-#     milestones=[5]
-# )
-
-# train_classifier(
-#     model = vit_cifar100,
-#     train_loader = train_loader_vit_cifar100,
-#     val_loader = val_loader_vit_cifar100,
-#     device = device,
-#     optimizer = optimizer_vit_cifar100,
-#     scheduler = scheduler_vit_cifar100,
-#     epochs = 100,
-#     use_amp = True,
-#     name_model = "ViT",
-#     name_dataset="cifar100",
-# )
+train_classifier(
+    model = resnet_cifar100,
+    train_loader = train_loader_resnet_cifar100,
+    val_loader = val_loader_resnet_cifar100,
+    device = device,
+    optimizer = optimizer_resnet_cifar100,
+    epochs = 100,
+    use_amp = True,
+    name_model = "resnet152",
+    name_dataset="cifar100",
+)
 
 
 
+# Finetuning MLP-Mixer
 # Finetuning MLP-Mixer pretrained on CIFAR10
 train_transform_mixer_cifar10 = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
@@ -454,3 +269,93 @@ train_classifier(
     name_model="MLPMixer_b16_224",
     name_dataset="cifar100",
 )
+
+
+# Finetuning ViT
+train_transform_vit_cifar = transforms.Compose([
+    transforms.Resize(256),
+    transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandAugment(num_ops=2, magnitude=9),
+    transforms.ToTensor(),
+    transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+])
+
+val_transform_vit_cifar = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
+])
+
+train_loader_vit_cifar10, val_loader_vit_cifar10, _ = get_cifar_loaders(
+    dataset_name="cifar10",
+    train_transform=train_transform_vit_cifar,
+    val_transform=val_transform_vit_cifar,
+    batch_size=256
+)
+
+train_loader_vit_cifar100, val_loader_vit_cifar100, _ = get_cifar_loaders(
+    dataset_name="cifar100",
+    train_transform=train_transform_vit_cifar,
+    val_transform=val_transform_vit_cifar,
+    batch_size=256
+)
+
+
+## Finetuning ViT for CIFAR10
+vit_cifar10 = ViT(num_classes=10)
+
+optimizer_vit_cifar10 = torch.optim.AdamW(vit_cifar10.parameters(), lr=3e-4, weight_decay=5e-2)
+
+warmup_cifar10 = torch.optim.lr_scheduler.LinearLR(optimizer_vit_cifar10, start_factor=0.1, total_iters=5)
+cosine_cifar10 = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_vit_cifar10, T_max=100-5, eta_min=1e-5)
+
+scheduler_vit_cifar10 = torch.optim.lr_scheduler.SequentialLR(
+    optimizer_vit_cifar10,
+    schedulers=[warmup_cifar10, cosine_cifar10],
+    milestones=[5]
+)
+
+train_classifier(
+    model = vit_cifar10,
+    train_loader = train_loader_vit_cifar10,
+    val_loader = val_loader_vit_cifar10,
+    device = device,
+    optimizer = optimizer_vit_cifar10,
+    scheduler = scheduler_vit_cifar10,
+    epochs = 100,
+    use_amp = True,
+    name_model = "ViT",
+    name_dataset="cifar10",
+)
+
+## Finetuning ViT for CIFAR100
+vit_cifar100 = ViT(num_classes=100)
+
+optimizer_vit_cifar100 = torch.optim.AdamW(vit_cifar100.parameters(), lr=3e-4, weight_decay=5e-2)
+
+warmup_cifar100 = torch.optim.lr_scheduler.LinearLR(optimizer_vit_cifar100, start_factor=0.1, total_iters=5)
+cosine_cifar100 = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer_vit_cifar100, T_max=100-5, eta_min=1e-5)
+
+scheduler_vit_cifar100 = torch.optim.lr_scheduler.SequentialLR(
+    optimizer_vit_cifar100,
+    schedulers=[warmup_cifar100, cosine_cifar100],
+    milestones=[5]
+)
+
+train_classifier(
+    model = vit_cifar100,
+    train_loader = train_loader_vit_cifar100,
+    val_loader = val_loader_vit_cifar100,
+    device = device,
+    optimizer = optimizer_vit_cifar100,
+    scheduler = scheduler_vit_cifar100,
+    epochs = 100,
+    use_amp = True,
+    name_model = "ViT",
+    name_dataset="cifar100",
+)
+
+
+
