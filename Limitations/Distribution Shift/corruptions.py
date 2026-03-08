@@ -102,8 +102,8 @@ class Corruptions:
         Diamond-square fractal heightmap, used to generate fog texture.
         """
         assert (mapsize & (mapsize - 1) ==0)
-        maparray = np.empty((mapsize, mapsize), dtype=np.float32)
-        maparray[0, 0] = 0
+        maparray= np.empty((mapsize, mapsize), dtype=np.float32)
+        maparray[0, 0]= 0
         stepsize = mapsize
         wibble = 100
 
@@ -255,10 +255,9 @@ class CorruptedDataset(data.Dataset):
             img_np =np.array(img).astype(np.float32)
 
         img_corrupted= self.corruption_fn(img_np, self.severity)
-        img_corrupted = np.clip(img_corrupted, 0, 255).astype(np.uint8)
+        img_corrupted =np.clip(img_corrupted, 0, 255).astype(np.uint8)
         img_pil =Image.fromarray(img_corrupted)
 
-        # Re-apply transforms if the base dataset had any (e.g. ToTensor, Normalize)
         if hasattr(self.base_dataset, 'transform') and self.base_dataset.transform is not None:
             img_pil = self.base_dataset.transform(img_pil)
 

@@ -19,11 +19,11 @@ def compute_reliability_bins(confidences: np.ndarray,
                               labels: np.ndarray,
                               preds: np.ndarray,
                               n_bins: int = 15) -> list:
-    bin_edges = np.linspace(0, 1, n_bins + 1)
+    bin_edges =np.linspace(0, 1, n_bins + 1)
     bins = []
     for i in range(n_bins):
         lo, hi  = bin_edges[i], bin_edges[i + 1]
-        mask    = (confidences >= lo) & (confidences < hi)
+        mask= (confidences >= lo) & (confidences < hi)
         n       = int(mask.sum())
         if n > 0:
             bins.append({
@@ -68,8 +68,8 @@ def get_metrics(logits: torch.Tensor,
     }
 
     conf_np  = confidences.cpu().numpy()
-    labels_np = labels.cpu().numpy()
-    preds_np  = preds.cpu().numpy()
+    labels_np =labels.cpu().numpy()
+    preds_np= preds.cpu().numpy()
 
     return metrics, conf_np, labels_np, preds_np
 
@@ -105,8 +105,8 @@ def evaluate_shift(data_dir: str,
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"No model at {model_path}. Run train.py first.")
 
-    block_config = [(depth - 4) // 6] * 3
-    orig_model   = DenseNet(
+    block_config =[(depth - 4) // 6] * 3
+    orig_model= DenseNet(
         growth_rate=growth_rate,
         block_config=block_config,
         num_classes=100
@@ -116,7 +116,7 @@ def evaluate_shift(data_dir: str,
 
     # ── Transforms & datasets ────────────────────────────────────────────────
     mean = [0.5071, 0.4867, 0.4408]
-    std  = [0.2675, 0.2565, 0.2761]
+    std  =[0.2675, 0.2565, 0.2761]
     normalize = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean, std),
@@ -155,14 +155,14 @@ def evaluate_shift(data_dir: str,
     for method in ['ts', 'ets', 'tva', 'dac']:
         print(f"\n{'='*42}\n  Method: {method.upper()}\n{'='*42}")
 
-        cal_model = ModelWithTemperature(orig_model, method=method, num_classes=100)
+        cal_model= ModelWithTemperature(orig_model, method=method, num_classes=100)
         cal_model.set_temperature(valid_loader)
 
         method_results = {"corruptions": {}}
 
         # ── Clean baseline ────────────────────────────────────────────────────
-        logits, labels = run_inference(cal_model, clean_loader)
-        metrics, conf_np, labels_np, preds_np = get_metrics(logits, labels)
+        logits, labels =run_inference(cal_model, clean_loader)
+        metrics, conf_np, labels_np, preds_np =get_metrics(logits, labels)
         metrics['bins'] = compute_reliability_bins(conf_np, labels_np, preds_np)
         method_results['clean_baseline'] = metrics
         print(f"  Clean → Acc={metrics['accuracy']:.4f}  "
@@ -176,7 +176,7 @@ def evaluate_shift(data_dir: str,
                 corrupted_ds  = CorruptedDataset(test_raw,
                                                  corruption_name=name,
                                                  severity=severity)
-                final_ds      = NormalizedDataset(corrupted_ds, normalize)
+                final_ds= NormalizedDataset(corrupted_ds, normalize)
                 loader        = DataLoader(final_ds, batch_size=batch_size,
                                            shuffle=False, num_workers=2,
                                            pin_memory=True)
@@ -185,7 +185,7 @@ def evaluate_shift(data_dir: str,
                 metrics, conf_np, labels_np, preds_np = get_metrics(logits, labels)
                 metrics['bins']                      = compute_reliability_bins(
                                                            conf_np, labels_np, preds_np)
-                method_results['corruptions'][name][severity] = metrics
+                method_results['corruptions'][name][severity] =metrics
 
             avg_ece = np.mean([
                 method_results['corruptions'][name][s]['ece']

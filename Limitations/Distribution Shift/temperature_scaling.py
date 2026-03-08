@@ -3,43 +3,9 @@ from torch import nn, optim
 from torch.nn import functional as F
 import numpy as np
 
-# =============================================================================
-# 1. ABSTRACT BASE CLASS
-# =============================================================================
-
-class PostHocCalibrator(nn.Module):
-    """
-    Abstract base class for all post-hoc calibration methods.
-    Enforces a standard interface for 'fit' and 'predict'.
-    """
-    def __init__(self):
-        super().__init__()
-
-    def fit(self, logits, labels):
-        """
-        Learn calibration parameters (T, weights, etc.) on a validation set.
-        
-        Args:
-            logits (torch.Tensor): Validation logits (N, C)
-            labels (torch.Tensor): Validation labels (N,)
-        """
-        raise NotImplementedError("Subclasses must implement fit()")
-
-    def predict(self, logits):
-        """
-        Apply calibration to test logits.
-        
-        Args:
-            logits (torch.Tensor): Test logits (N, C)
-            
-        Returns:
-            probs (torch.Tensor): Calibrated probabilities (N, C) summing to 1.
-        """
-        raise NotImplementedError("Subclasses must implement predict()")
-
 
 # =============================================================================
-# 2. TEMPERATURE SCALING (Refactored)
+#  TEMPERATURE SCALING (Refactored)
 # =============================================================================
 
 class TemperatureScaling(PostHocCalibrator):
@@ -127,15 +93,12 @@ class ModelWithTemperature(nn.Module):
         """
         logits = self.model(input)
         
-        # If it's TemperatureScaling, we can return scaled logits directly.
-        # This maintains compatibility with your existing metrics that need logits.
         if isinstance(self.calibrator, TemperatureScaling):
             return self.calibrator.temperature_scale(logits)
         
-        # For other methods (TvA, ETS) that return probabilities, 
-        # we might need to return log(probs) to approximate logits.
+
         probs = self.calibrator.predict(logits)
-        return torch.log(probs + 1e-12) # Log-probs for stability
+        return torch.log(probs + 1e-12) 
 
     def set_temperature(self, valid_loader):
         """
@@ -253,7 +216,6 @@ class AdaptiveECELoss(nn.Module):
             
         return ece
 
-# Wrapper for backward compatibility if you import _ECELoss elsewhere
 _ECELoss = ECELoss
 
 
@@ -273,9 +235,7 @@ class EnsembleTemperatureScaling(PostHocCalibrator):
     def __init__(self, num_classes=100):
         super().__init__()
         self.num_classes = num_classes
-        # T parameter (initialize to 1.5 like standard TS)
         self.temperature = nn.Parameter(torch.ones(1) * 1.5)
-        # Weights for the 3 components (unconstrained raw scores)
         self.w_raw = nn.Parameter(torch.zeros(3)) 
 
     def fit(self, logits, labels):
@@ -284,7 +244,6 @@ class EnsembleTemperatureScaling(PostHocCalibrator):
         labels = labels.cuda()
         nll_criterion = nn.CrossEntropyLoss().cuda()
         
-        # Optimize T and weights jointly
         optimizer = optim.LBFGS([self.temperature, self.w_raw], lr=0.01, max_iter=50)
 
         def eval_step():
@@ -304,9 +263,7 @@ class EnsembleTemperatureScaling(PostHocCalibrator):
             
             # Weighted Sum
             p_final = w[0] * p1 + w[1] * p2 + w[2] * p3
-            
-            # NLL Loss (Manual calculation since we have probs, not logits)
-            # Clip for numerical stability
+
             p_final = p_final.clamp(min=1e-12)
             loss = torch.mean(-torch.log(p_final[range(len(labels)), labels]))
             
@@ -348,7 +305,6 @@ class TopVersusAll(PostHocCalibrator):
     def __init__(self, num_classes=100):
         super().__init__()
         self.num_classes = num_classes
-        # Learn a and b for each class: sigmoid(a * logit + b)
         self.a = nn.Parameter(torch.ones(num_classes))
         self.b = nn.Parameter(torch.zeros(num_classes))
 
@@ -357,25 +313,20 @@ class TopVersusAll(PostHocCalibrator):
         logits = logits.cuda()
         labels = labels.cuda()
         
-        # We optimize NLL for each class independently
-        # But for speed in PyTorch, we can do it in a vectorized way
-        # or just a simple loop if classes are < 1000
+ 
         
         optimizer = optim.LBFGS([self.a, self.b], lr=0.01, max_iter=50)
         
-        # Create binary targets for each class: 1 if label==k, else 0
-        # shape: (N, K)
+
         y_onehot = F.one_hot(labels, num_classes=self.num_classes).float()
 
         def eval_step():
             optimizer.zero_grad()
             
-            # Vectorized Logistic Regression
-            # calibrated_logit_k = a_k * logit_k + b_k
+
             cal_logits = self.a.unsqueeze(0) * logits + self.b.unsqueeze(0)
             
-            # Binary Cross Entropy with Logits
-            # We want to minimize BCE for each class and sum them up
+
             loss = F.binary_cross_entropy_with_logits(cal_logits, y_onehot)
             
             loss.backward()
@@ -386,13 +337,10 @@ class TopVersusAll(PostHocCalibrator):
         return self
 
     def predict(self, logits):
-        # Apply binary calibration to every logit
         cal_logits = self.a.unsqueeze(0) * logits + self.b.unsqueeze(0)
         
-        # Convert to probabilities using Sigmoid (since they are binary probs)
         probs = torch.sigmoid(cal_logits)
         
-        # Normalize so they sum to 1 (Standard TvA step)
         probs = probs / probs.sum(dim=1, keepdim=True)
         return probs
 
@@ -407,16 +355,14 @@ class DensityAwareCalibration(PostHocCalibrator):
         super().__init__()
         self.temperature = nn.Parameter(torch.ones(1) * 1.5)
         self.alpha = nn.Parameter(torch.zeros(1)) # Sensitivity to OOD
-        self.prototypes = None # Will store cluster centers or mean logits
+        self.prototypes = None 
 
     def fit(self, logits, labels):
         self.cuda()
         logits = logits.cuda()
         labels = labels.cuda()
         
-        # 1. Density Estimation Setup
-        # Simple version: Compute mean logit vector for correct predictions
-        # A more complex version uses kNN on all training features
+      
         with torch.no_grad():
             self.train_mean = logits.mean(dim=0, keepdim=True)
             self.train_std = logits.std(dim=0, keepdim=True) + 1e-6
@@ -427,15 +373,10 @@ class DensityAwareCalibration(PostHocCalibrator):
         def eval_step():
             optimizer.zero_grad()
             
-            # Calculate Density (Distance)
-            # Normalized Euclidean distance to the global mean of validation set
-            # (proxy for "how weird is this sample")
+
             z_score = (logits - self.train_mean) / self.train_std
             dist = z_score.norm(dim=1)
-            
-            # Adaptive Temperature
-            # If dist is high (OOD), T increases -> confidence drops
-            # Softplus ensures T > 0
+
             t_adaptive = F.softplus(self.temperature + self.alpha * dist).unsqueeze(1)
             
             loss = nn.CrossEntropyLoss()(logits / t_adaptive, labels)

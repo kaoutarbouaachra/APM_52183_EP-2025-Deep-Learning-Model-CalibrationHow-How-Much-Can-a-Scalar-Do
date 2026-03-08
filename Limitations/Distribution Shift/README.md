@@ -1,101 +1,77 @@
-# Post-Hoc Calibration Under Distribution Shift (Ovadia+ Benchmark)
+# DL-DIY potential project ideas
+- test different calibration strategies from both traditional machine learning (Platt Scaling, isotonic regression) and deep-learning approaches (temperature scaling). You can find them as baselines in the original paper [On Calibration of Modern Neural Networks](https://arxiv.org/abs/1706.04599). As datasets you can use CIFAR-10, CIFAR-100 or ImageNet. For the formers you can decide whether to train the networks yourself or find a pre-trained model.
+- the ECE metric (Expected Calibration Error), has been subject to several critics recently. Other calibration metrics can be considered [here](https://github.com/uu-sml/calibration) or complementary metrics for [robustness](https://github.com/google-research/robustness_metrics). Compare several such metrics on CIFAR-10 and/or ImageNet
+- evaluate ECE across several architectures of different capacities and types. Do you observe the same overconfidence pattern across networks?
+- implement one of the experiments from this paper [On Mixup Training: Improved Calibration and Predictive Uncertainty for Deep Neural Networks](https://arxiv.org/abs/1905.11001) on STL-10 or CIFAR-10 or CIFAR-100. You can use MNIST or Fashion-MNIST for prototyping
+- Ovadia et al. ([Can You Trust Your Model's Uncertainty? Evaluating Predictive Uncertainty Under Dataset Shift](https://arxiv.org/abs/1906.02530)) have shown that temperature scaling does not do well in presence of dataset shift. Verify this result on [CIFAR-10-C](https://github.com/hendrycks/outlier-exposure)
+- Mukhoti et al.([Calibrating Deep Neural Networks using Focal Loss](https://arxiv.org/abs/2002.09437)) have shown that training a network with the focal loss instead of cross-entropy loss leads to better calibrated networks. Using their [repo](https://github.com/torrvision/focal_calibration) to boostrap you for training a network on CIFAR-10 using focal loss and compare it with temperature-scaling. What if you perform temperature scaling on the focal loss trained network?
+- other idea: [Normalization Calibration (NorCal) for Long-Tailed Object Detection and Instance Segmentation](https://github.com/tydpan/NorCal)
+---------------------
 
-This repository contains experiments designed to investigate the **limitations of Temperature Scaling (TS)** and evaluate modern post-hoc calibration methods under **distribution shift**. The goal is to understand how different calibrators (TS, ETS, TvA, DAC) behave when a model is exposed to corrupted, out-of-distribution (OOD) data where it is highly prone to overconfidence errors.
+# Temperature Scaling
+A simple way to calibrate your neural network.
+The `temperature_scaling.py` module can be easily used to calibrated any trained model.
 
-## Major Limitations of Temperature Scaling under Shift
+Based on results from [On Calibration of Modern Neural Networks](https://arxiv.org/abs/1706.04599).
 
-### The Ovadia Collapse and the Advantage of ETS
+## Motivation
 
-A key limitation of Temperature Scaling (TS) is its reliance on a single, global scalar fitted on clean validation data. As demonstrated by Ovadia et al. (2019), TS performance degrades catastrophically under domain shift (e.g., image corruptions). Because TS has no mechanism to detect OOD inputs, corrupted images producing noisy logits receive the exact same temperature scaling as clean images, resulting in highly confident but incorrect predictions (severe NLL degradation).
+**TLDR:** Neural networks tend to output overconfident probabilities.
+Temperature scaling is a post-processing method that fixes it.
 
-In contrast, **Ensemble Temperature Scaling (ETS)** acts as a structural safeguard. By hedging the temperature-scaled softmax with the original distribution and a uniform prior, ETS explicitly bounds the maximum confidence the model can output under extreme uncertainty. This addresses the root cause of TS failure under shift, achieving vastly superior Negative Log-Likelihood (NLL) without requiring access to corrupted data at calibration time.
+**Long:**
 
-### The TvA Paradox: Low ECE $\neq$ Good Calibration
+Neural networks output "confidence" scores along with predictions in classification.
+Ideally, these confidence scores should match the true correctness likelihood.
+For example, if we assign 80% confidence to 100 predictions, then we'd expect that 80% of
+the predictions are actually correct. If this is the case, we say the network is **calibrated**.
 
-Our experiments expose a critical flaw in relying solely on Expected Calibration Error (ECE). **Top-versus-All (TvA)** calibration achieves near-zero ECE under severe noise corruptions, creating the illusion of perfect calibration. However, analysis of NLL reveals that TvA's per-class sigmoid normalisation aggressively squashes all predictions toward uniform probability ($1/K$). The low ECE simply arises from the model's confidence collapsing at the exact same rate as its accuracy, effectively masking a complete loss of discriminative power.
+A simple way to visualize calibration is plotting accuracy as a function of confidence.
+Since confidence should reflect accuracy, we'd like for the plot to be an identity function.
+If accuracy falls below the main diagonal, then our network is overconfident.
+This happens to be the case for most neural networks, such as this ResNet trained on CIFAR100.
 
-## Purpose
+![Uncalibrated ResNet](https://user-images.githubusercontent.com/824157/28974416-51ba7be4-7904-11e7-89ff-3c9b0ec4b607.png)
 
-- Assess the robustness of standard Temperature Scaling against data distribution shifts.
-- Compare standard TS with state-of-the-art post-hoc alternatives: ETS, TvA, and Density-Aware Calibration (DAC).
-- Systematically evaluate these methods across 13 corruption types and 5 severity levels (CIFAR-100-C taxonomy).
-- Demonstrate the necessity of evaluating both ECE and NLL to detect pathological calibration artifacts.
+Temperature scaling is a post-processing technique to make neural networks calibrated.
+After temperature scaling, you can trust the probabilities output by a neural network:
 
+![Calibrated ResNet](https://user-images.githubusercontent.com/824157/28974415-51ae78a8-7904-11e7-9b33-8fbe1f7c0a53.png)
 
-## Experimental Configurations
-
-| Feature | Details | Total |
-| :-- | :-- | :-- |
-| Dataset | Clean CIFAR-100 + CIFAR-100-C | 1 + 13 |
-| Architecture | DenseNet-BC-40 (Trained from scratch via ERM) | 1 |
-| Corruptions | Noise (Gaussian, Shot, Impulse), Blur (Defocus, Glass, Motion, Zoom), Weather (Fog, Brightness, Contrast), Digital (Elastic, Pixelate, JPEG) | 13 |
-| Severities | Levels 1 through 5 | 5 |
-| Calibrators | TS, ETS, TvA, DAC | 4 |
-| **Total Evaluation Runs** | **4 methods $\times$ 13 corruptions $\times$ 5 severities** | **260 evaluations** |
-
-## How to Run Experiments
-
-The experimental pipeline is split into model training, calibrator fitting, and distribution shift evaluation.
-
-### 1. Train the Base Model
-
-First, train a standard DenseNet-BC-40 on CIFAR-100. This will output `model.pth` and `valid_indices.pth` to the `.checkpoints/` directory.
-
-
-| Action | Terminal Command |
-| :-- | :-- |
-| Train DenseNet-40 | `python3 train.py --data .data --save .checkpoints --depth 40 --nepochs 300` |
-
-### 2. Run the Distribution Shift Benchmark
-
-Once the model is trained, evaluate all four post-hoc calibrators across the entire corruption taxonomy. The script will automatically load the validation set used during training to fit the calibrators, apply the 13 corruptions on-the-fly, and save the metrics.
+Temperature scaling divides the logits (inputs to the softmax function) by a learned scalar parameter. I.e.
+```
+softmax = e^(z/T) / sum_i e^(z_i/T)
+```
+where `z` is the logit, and `T` is the learned parameter.
+We learn this parameter on a validation set, where T is chosen to minimize NLL.
 
 
-| Action | Terminal Command |
-| :-- | :-- |
-| Run Full Benchmark | `python3 evaluate_shift.py --data .data --save .checkpoints` |
+## Demo
 
-*Note: Running this command will generate `.checkpoints/ovadia_plus_results.json`, which contains the complete breakdown of Accuracy, NLL, ECE, and Adaptive ECE for every method, corruption, and severity level.*
+First train a DenseNet on CIFAR100, and save the validation indices:
+```sh
+python train.py --data <path_to_data> --save <save_folder_dest>
+```
 
-### 3. Analyze and Visualize Results
-
-Open the provided Jupyter Notebook to visualize the benchmark results.
-
-
-| Action | Command / File |
-| :-- | :-- |
-| Generate Reliability Diagrams | Run all cells in `summary.ipynb` |
-| View Individual Corruptions | `python3 plot_per_corruption.py` |
-
-## Repository Structure
-
-- `train.py`: Script to train the base DenseNet-BC-40 model.
-- `models/`: Contains the DenseNet architecture definitions.
-- `corruptions.py`: On-the-fly generation of CIFAR-100-C image corruptions.
-- `temperature_scaling.py`: Implementations of `ModelWithTemperature` (TS), `ETS`, `TvA`, and `DAC`.
-- `evaluate_shift.py`: Main benchmarking loop applying the corruptions and recording metrics to JSON.
-- `plot_per_corruption.py`: Generates line plots of calibration metrics vs corruption severity.
-- `summary.ipynb`: Comprehensive Jupyter notebook analyzing the JSON results, plotting metric trajectories, and generating fixed-grid reliability diagrams.
+Then temperature scale it
+```sh
+python demo.py --data <path_to_data> --save <save_folder_dest>
+```
 
 
-## References
+## To use in a project
 
-1. Guo, C., Pleiss, G., Sun, Y., \& Weinberger, K. Q. (2017).
-*On Calibration of Modern Neural Networks*. ICML.
-[Link](https://arxiv.org/abs/1706.04599)
-2. Ovadia, Y., Fertig, E., Ren, J., Nado, Z., Sculley, D., Nowozin, S., ... \& Snoek, J. (2019).
-*Can You Trust Your Model's Uncertainty? Evaluating Predictive Uncertainty Under Dataset Shift*. NeurIPS.
-[Link](https://arxiv.org/abs/1906.02530)
-3. Hendrycks, D., \& Dietterich, T. (2019).
-*Benchmarking Neural Network Robustness to Common Corruptions and Perturbations*. ICLR.
-[Link](https://arxiv.org/abs/1903.12261)
-4. Zhang, J., Kailkhura, A., \& Han, T. Y. J. (2020).
-*Mix-n-Match: Ensemble and Compositional Methods for Uncertainty Calibration in Deep Learning*. ICML.
-*(Introduces ETS)* [Link](https://arxiv.org/abs/2003.07329)
-5. Paisley, J., et al. (2024).
-*Top-versus-All Calibration for Neural Networks*.[Link](https://arxiv.org/pdf/2505.22803)
-6. *Density-Aware Calibration (DAC)* (2023).
-*(Input-dependent scaling using logit-space L2 distance to validation mean).* [link](https://arxiv.org/html/2302.05118v2#:~:text=DAC%20boosts%20the%20robustness%20of,architectures%2C%20datasets%2C%20and%20metrics.) 
+Copy the file `temperature_scaling.py` to your repo.
+Train a model, and **save the validation set**.
+(You must use the same validation set for training as for temperature scaling).
+You can do something like this:
 
+```python
+from temperature_scaling import ModelWithTemperature
 
+orig_model = ... # create an uncalibrated model somehow
+valid_loader = ... # Create a DataLoader from the SAME VALIDATION SET used to train orig_model
 
+scaled_model = ModelWithTemperature(orig_model)
+scaled_model.set_temperature(valid_loader)
+```
