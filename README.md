@@ -22,8 +22,8 @@ The project is structured to separate experiments and analyses related to both t
 
 
 - **Limitations/**: Contains experiments highlighting the boundaries of Temperature Scaling. Each subfolder includes a `README.md` explaining the experimental setup and methodology.  
-- **Utility of Temperature Scaling/**: Contains experiments illustrating the practical usefulness and effectiveness of Temperature Scaling.  
-- **final_notebook.ipynb**: A Jupyter notebook compiling all executed figures, results, and detailed analyses for easy review.  
+- **calibration_methods/**: Contains experiments illustrating the practical usefulness and effectiveness of Temperature Scaling.  
+- **summary.ipynb**: A Jupyter notebook compiling all executed figures, results, and detailed analyses for easy review.  
 ---
 ## Usage
 
@@ -123,4 +123,5 @@ The project is structured to separate experiments and analyses related to both t
 27. Kull, Meelis; Perello-Nieto, Miquel; Kängsepp, Markus; et al.  
     *Beyond Temperature Scaling: Obtaining Well-Calibrated Multiclass Probabilities with Dirichlet Calibration*, NeurIPS 2019.  
     [Link](https://proceedings.neurips.cc/paper/2019/hash/8ca01ea920679a0fe3728441494041b9)
+
 
