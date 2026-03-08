@@ -41,6 +41,9 @@ Each is applied at **severity levels 1–5**, where level 5 represents the most 
 
 ---
 
+![Calibration Metrics vs. Corruption Severity on CIFAR-100, Mean over all 13 corruption types](checkpoints/fig2_all_methods_all_metrics.png)
+
+
 ##  Limitation 1 — Temperature Scaling Fails Under Shift
 
 **Root Cause:** TS fits a single global scalar `T` on clean i.i.d. validation data. It has **no mechanism to adapt** when the test distribution changes.
