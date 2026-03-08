@@ -41,8 +41,7 @@ Each is applied at **severity levels 1–5**, where level 5 represents the most 
 
 ---
 
-![Calibration Metrics vs. Corruption Severity on CIFAR-100, Mean over all 13 corruption types](checkpoints/fig2_all_methods_all_metrics.png)
-
+![Calibration Metrics](./checkpoints/fig2_all_methods_all_metrics.png)
 
 ##  Limitation 1 — Temperature Scaling Fails Under Shift
 
