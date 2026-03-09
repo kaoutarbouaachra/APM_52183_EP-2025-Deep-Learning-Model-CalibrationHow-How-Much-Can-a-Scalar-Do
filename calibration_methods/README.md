@@ -16,6 +16,19 @@ First, we compute calibration metrics for the **uncalibrated models**. Then, we 
 
 Finally, we evaluate the calibrated models on the test set. The calibration metrics are implemented in `metrics.py`.
 
+## Results 
+
+| Dataset   | Model       | Uncalibrated | Hist. Binning | Isotonic Regr. | Matrix Scaling | Vector Scaling | Temp. Scaling |
+|-----------|------------|--------------|---------------|----------------|---------------|---------------|---------------|
+| CIFAR-10  | ResNet 152 | 3.42% | 0.79% | 0.86% | 0.81% | **0.44%** | 0.94% |
+| CIFAR-10  | MLP-Mixer  | 3.85% | 1.3% | 1.18% | **0.7%** | 0.74% | 0.95% |
+| CIFAR-10  | ViT        | 2.09% | 0.86% | 1.04% | 1.01% | **0.79%** | 0.84% |
+| CIFAR-10  | CLIP       | 5.88% | 2.84% | 1.32% | 5.65% | **0.48%** | 2% |
+| CIFAR-100 | ResNet 152 | 14.78% | 5.81% | 4.89% | 13.77% | **2.5%** | 4.32% |
+| CIFAR-100 | MLP-Mixer  | 14.87% | 7.89% | 6.91% | 15.18% | **4.97%** | 5.21% |
+| CIFAR-100 | ViT        | 10.64% | 6.08% | 4.62% | 11.88% | **3.31%** | 3.58% |
+| CIFAR-100 | CLIP       | 10.47% | 7.6% | 3% | 15.09% | 2.58% | **2.38%** |
+
 ## References
 
 1. C. Guo, G. Pleiss, Y. Sun, and K. Q. Weinberger, *On Calibration of Modern Neural Networks*, Proceedings of the 34th International Conference on Machine Learning (ICML), pp. 1321–1330, 2017.
